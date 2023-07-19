@@ -35,7 +35,7 @@ contract AVAXGods is ERC1155, Ownable, ERC1155Supply {
 
   uint public commissionRate = 5;
 
-  // address owner;
+  address owner;
 
   fallback() external payable {} 
 
@@ -144,7 +144,7 @@ contract AVAXGods is ERC1155, Ownable, ERC1155Supply {
   constructor(string memory _metadataURI,address tokenAddress) ERC1155(_metadataURI) {
     baseURI = _metadataURI; // Set baseURI
     token = IERC20(tokenAddress);
-    // owner = msg.sender;
+    owner = msg.sender;
     initialize();
   }
 
@@ -154,7 +154,7 @@ contract AVAXGods is ERC1155, Ownable, ERC1155Supply {
 
   function initialize() private {
     gameTokens.push(GameToken("", 0, 0, 0));
-    players.push(Player(payable(address(0)), "", 0, 0, false));
+    players.push(Player(address(0), "", 0, 0, false));
     battles.push(Battle(BattleStatus.PENDING, bytes32(0), "", [address(0), address(0)], [0, 0], address(0)));
   }
 
@@ -164,14 +164,10 @@ contract AVAXGods is ERC1155, Ownable, ERC1155Supply {
     require(!isPlayer(msg.sender), "Player already registered"); // Require that player is not already registered
     
     uint256 _id = players.length;
-    players.push(Player(payable(msg.sender), _name, 10, 25, false)); // Adds player to players array
+    players.push(Player(msg.sender, _name, 10, 25, false)); // Adds player to players array
     playerInfo[msg.sender] = _id; // Creates player info mapping
 
-    require(token.balanceOf(address(this)) > 100 ,"insufficient tokens");
-
-    token.transfer(msg.sender, 100*10**18); //100 token air drop
-
-
+    token.transfer(msg.sender, 100); //100 token air drop
 
     createRandomGameToken(_gameTokenName);
     
@@ -264,11 +260,9 @@ contract AVAXGods is ERC1155, Ownable, ERC1155Supply {
     require(_battle.battleStatus == BattleStatus.PENDING, "Battle already started!"); // Require that battle has not started
     require(_battle.players[0] != msg.sender, "Only player two can join a battle"); // Require that player 2 is joining the battle
     require(!getPlayer(msg.sender).inBattle, "Already in battle"); // Require that player is not already in a battle
-    require(token.allowance(_battle.players[0], address(this)) >= betAmount, "Token Allowance Not Set");
-    require(token.allowance(_battle.players[1], address(this)) >= betAmount, "Token Allowance Not Set");
-    require(token.transferFrom(_battle.players[0], address(this), betAmount), "Token Transfer Faild");
-    require(token.transferFrom(_battle.players[1], address(this), betAmount), "Token Transfer Faild");
+    
     _battle.battleStatus = BattleStatus.STARTED;
+
     _battle.players[1] = msg.sender;
     updateBattle(_name, _battle);
 
@@ -481,10 +475,6 @@ contract AVAXGods is ERC1155, Ownable, ERC1155Supply {
     players[p2].playerMana = 10;
 
     address _battleLoser = battleEnder == _battle.players[0] ? _battle.players[1] : _battle.players[0];
-    uint commission = (betAmount * commissionRate) / 100;
-    uint payout = betAmount * 2;
-    require(token.transfer(battleEnder, payout - commission), "Token Transfer Faild");
-    require(token.transfer(address(this), commission), "Token Transfer Faild");
 
     emit BattleEnded(_battle.name, battleEnder, _battleLoser); // Emits BattleEnded event
 
