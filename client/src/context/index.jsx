@@ -4,7 +4,7 @@ import Web3Modal from 'web3modal';
 import { useNavigate } from 'react-router-dom';
 
 import { GetParams } from '../utils/Onboard.js';
-import { ABI, ADDRESS , ABITOKEN, TOKEN_ADDRESS} from '../contract';
+import { ABI, ADDRESS, ABITOKEN, TOKEN_ADDRESS } from '../contract';
 import { createEventListeners } from './createEventListeners';
 
 const GlobalContext = createContext();
@@ -72,12 +72,12 @@ export const GlobalContextProvider = ({ children }) => {
       const connection = await web3Modal.connect();
       const newProvider = new ethers.providers.Web3Provider(connection);
       const signer = newProvider.getSigner();
+      const newTokenContract = new ethers.Contract(TOKEN_ADDRESS, ABITOKEN, signer);
       const newContract = new ethers.Contract(ADDRESS, ABI, signer);
-      const tokenContract = new ethers.Contract(TOKEN_ADDRESS, ABITOKEN, signer);
-
       setProvider(newProvider);
+      console.log('set contract');
       setContract(newContract);
-      setTokenContract(tokenContract);
+      setTokenContract(newTokenContract);
     };
 
     setSmartContractAndProvider();
@@ -157,6 +157,7 @@ export const GlobalContextProvider = ({ children }) => {
         setBattleGround,
         contract,
         tokenContract,
+        ADDRESS,
         gameData,
         walletAddress,
         updateCurrentWalletAddress,

@@ -14,6 +14,7 @@ const Home = () => {
     try {
       console.log('enter try');
       console.log(walletAddress);
+      console.log(contract);
       const playerExists = await contract.isPlayer(walletAddress);
       console.log('checkpleyer');
 
@@ -32,6 +33,7 @@ const Home = () => {
       }
     } catch (error) {
       console.log('catch');
+      console.log(error);
       setErrorMessage(error);
     }
     console.log('register button click ended');

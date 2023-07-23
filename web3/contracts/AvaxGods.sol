@@ -4,8 +4,8 @@ pragma solidity =0.8.16;
 
 import '@openzeppelin/contracts/token/ERC1155/ERC1155.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
+import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol';
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /// @title AVAXGods
 /// @notice This contract handles the token management and battle logic for the AVAXGods game
@@ -31,11 +31,12 @@ contract AVAXGods is ERC1155, Ownable, ERC1155Supply {
 
   IERC20 public token;
 
-  uint public betAmount = 1;
+  address payable _commisionAddress;
+
+  uint public betAmount = 1 * 10**18;
 
   uint public commissionRate = 5;
 
-  address owner;
 
   fallback() external payable {} 
 
@@ -49,7 +50,7 @@ contract AVAXGods is ERC1155, Ownable, ERC1155Supply {
 
   /// @dev Player struct to store player info
   struct Player {
-    address payable playerAddress; /// @param playerAddress player wallet address
+    address playerAddress; /// @param playerAddress player wallet address
     string playerName; /// @param playerName player name; set by player during registration
     uint256 playerMana; /// @param playerMana player mana; affected by battle results
     uint256 playerHealth; /// @param playerHealth player health; affected by battle results
@@ -141,10 +142,10 @@ contract AVAXGods is ERC1155, Ownable, ERC1155Supply {
 
   /// @dev Initializes the contract by setting a `metadataURI` to the token collection
   /// @param _metadataURI baseURI where token metadata is stored
-  constructor(string memory _metadataURI,address tokenAddress) ERC1155(_metadataURI) {
+  constructor(string memory _metadataURI,address tokenAddress, address commisionAddress) ERC1155(_metadataURI) {
     baseURI = _metadataURI; // Set baseURI
     token = IERC20(tokenAddress);
-    owner = msg.sender;
+    _commisionAddress = payable(commisionAddress);
     initialize();
   }
 
@@ -167,7 +168,8 @@ contract AVAXGods is ERC1155, Ownable, ERC1155Supply {
     players.push(Player(msg.sender, _name, 10, 25, false)); // Adds player to players array
     playerInfo[msg.sender] = _id; // Creates player info mapping
 
-    token.transfer(msg.sender, 100); //100 token air drop
+    uint256 amount = 10 * 10**18;
+    require(token.transfer(msg.sender, amount), "Failed to transfer token"); //100 token air drop
 
     createRandomGameToken(_gameTokenName);
     
@@ -254,12 +256,18 @@ contract AVAXGods is ERC1155, Ownable, ERC1155Supply {
 
   /// @dev Player joins battle
   /// @param _name battle name; name of battle player wants to join
-  function joinBattle(string memory _name) external returns (Battle memory) {
+  function joinBattle(string memory _name) external payable returns (Battle memory) {
     Battle memory _battle = getBattle(_name);
 
     require(_battle.battleStatus == BattleStatus.PENDING, "Battle already started!"); // Require that battle has not started
     require(_battle.players[0] != msg.sender, "Only player two can join a battle"); // Require that player 2 is joining the battle
     require(!getPlayer(msg.sender).inBattle, "Already in battle"); // Require that player is not already in a battle
+    
+    require(token.allowance(msg.sender, address(this)) >= betAmount, "token allowance not set for you");
+    require(token.allowance(_battle.players[0], address(this)) >= betAmount, "token allowance not set for opponent");
+
+    require(token.transferFrom(msg.sender, address(this), betAmount), "token transfer failed for you");
+    require(token.transferFrom(_battle.players[0], address(this), betAmount), "token transfer failed ");
     
     _battle.battleStatus = BattleStatus.STARTED;
 
@@ -365,7 +373,14 @@ contract AVAXGods is ERC1155, Ownable, ERC1155Supply {
 
     address[2] memory _damagedPlayers = [address(0), address(0)];
     
-    if (p1.move == 1 && p2.move == 1) {
+    //edit by javad in order resolve end of game
+    if (p1.move == 1 || p2.move == 1) {
+      if (p1.attack >= p2.health) {
+        _endBattle(_battle.players[0], _battle);
+      } else if (p2.attack >= p1.health) {
+        _endBattle(_battle.players[1], _battle);
+      }
+    } else if (p1.move == 1 && p2.move == 1) {
       if (p1.attack >= p2.health) {
         _endBattle(_battle.players[0], _battle);
       } else if (p2.attack >= p1.health) {
@@ -456,7 +471,7 @@ contract AVAXGods is ERC1155, Ownable, ERC1155Supply {
   /// @dev internal function to end the battle
   /// @param battleEnder winner address
   /// @param _battle battle; taken from attackOrDefend function
-  function _endBattle(address battleEnder, Battle memory _battle) internal returns (Battle memory) {
+  function _endBattle(address battleEnder, Battle memory _battle) internal  returns (Battle memory) {
     require(_battle.battleStatus != BattleStatus.ENDED, "Battle already ended"); // Require that battle has not ended
 
     _battle.battleStatus = BattleStatus.ENDED;
@@ -475,6 +490,12 @@ contract AVAXGods is ERC1155, Ownable, ERC1155Supply {
     players[p2].playerMana = 10;
 
     address _battleLoser = battleEnder == _battle.players[0] ? _battle.players[1] : _battle.players[0];
+
+    uint payout = betAmount*2;
+    uint commission =(betAmount*commissionRate)/100;
+    uint rewardOfWinner = payout-commission;
+    require(token.transfer(battleEnder,rewardOfWinner), "transfer failed for winner");
+    require(token.transfer(_commisionAddress, commission), "transfer failed for commision");
 
     emit BattleEnded(_battle.name, battleEnder, _battleLoser); // Emits BattleEnded event
 

@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ethers } from 'ethers';
 
 import styles from '../styles';
 import { useGlobalContext } from '../context';
 import { CustomButton, CustomInput, GameLoad, PageHOC } from '../components';
 
 const CreateBattle = () => {
-  const { contract, gameData, battleName, setBattleName, setErrorMessage } = useGlobalContext();
+  const { contract, tokenContract, ADDRESS, gameData, battleName, setBattleName, setErrorMessage } = useGlobalContext();
   const [waitBattle, setWaitBattle] = useState(false);
   const navigate = useNavigate();
 
@@ -23,6 +24,16 @@ const CreateBattle = () => {
 
     try {
       await contract.createBattle(battleName);
+      console.log('after create battle');
+      const amount = ethers.utils.parseUnits('1.0', 18);
+      const approved = await tokenContract.approve(ADDRESS, amount);
+      console.log('after approve');
+
+      if (approved) {
+        console.log('Approval successful!');
+      } else {
+        console.log('Approval failed!');
+      }
 
       setWaitBattle(true);
     } catch (error) {

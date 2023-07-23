@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ethers } from 'ethers';
 
 import { useGlobalContext } from '../context';
 import { CustomButton, PageHOC } from '../components';
@@ -7,7 +8,7 @@ import styles from '../styles';
 
 const JoinBattle = () => {
   const navigate = useNavigate();
-  const { contract, tokenContract, gameData, setShowAlert, setBattleName, setErrorMessage, walletAddress } = useGlobalContext();
+  const { contract, tokenContract, ADDRESS, gameData, setShowAlert, setBattleName, setErrorMessage, walletAddress } = useGlobalContext();
 
   useEffect(() => {
     if (gameData?.activeBattle?.battleStatus === 1) navigate(`/battle/${gameData.activeBattle.name}`);
@@ -19,13 +20,15 @@ const JoinBattle = () => {
 
     try {
       console.log('enter try');
-      const approved = await tokenContract.approve('0xA275A7B25f28Ad27d8af78d33587A0c90C06fAB0', 1);
-
-    if (approved) {
-      console.log("Approval successful!");
-    } else {
-      console.log("Approval failed!");
-    }
+      const amount = ethers.utils.parseUnits('1.0', 18);
+      console.log('after parseunits');
+      const approved = await tokenContract.approve(ADDRESS, amount);
+      console.log('after approve');
+      if (approved) {
+        console.log('Approval successful!');
+      } else {
+        console.log('Approval failed!');
+      }
       await contract.joinBattle(battleName);
       console.log('joinbattle');
 
