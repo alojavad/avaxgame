@@ -23,10 +23,10 @@ const CreateBattle = () => {
     if (battleName === '' || battleName.trim() === '') return null;
 
     try {
-      await contract.createBattle(battleName);
-      console.log('after create battle');
       const amount = ethers.utils.parseUnits('1.0', 18);
       const approved = await tokenContract.approve(ADDRESS, amount);
+      await contract.createBattle(battleName);
+      console.log('after create battle');
       console.log('after approve');
 
       if (approved) {

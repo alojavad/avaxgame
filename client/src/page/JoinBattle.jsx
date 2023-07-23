@@ -14,6 +14,10 @@ const JoinBattle = () => {
     if (gameData?.activeBattle?.battleStatus === 1) navigate(`/battle/${gameData.activeBattle.name}`);
   }, [gameData]);
 
+  const delay = ms => new Promise(
+    resolve => setTimeout(resolve, ms)
+  );
+
   const handleClick = async (battleName) => {
     console.log('koin button clicked');
     setBattleName(battleName);
@@ -29,6 +33,7 @@ const JoinBattle = () => {
       } else {
         console.log('Approval failed!');
       }
+      await delay(5000);
       await contract.joinBattle(battleName);
       console.log('joinbattle');
 
