@@ -373,15 +373,7 @@ contract AVAXGods is ERC1155, Ownable, ERC1155Supply {
 
     address[2] memory _damagedPlayers = [address(0), address(0)];
     
-    //edit by javad in order resolve end of game
-    _endBattle(_battle.players[0], _battle);
-    if (p1.move == 1 || p2.move == 1) {
-      if (p1.attack >= p2.health) {
-        _endBattle(_battle.players[0], _battle);
-      } else if (p2.attack >= p1.health) {
-        _endBattle(_battle.players[1], _battle);
-      }
-    } else if (p1.move == 1 && p2.move == 1) {
+     if (p1.move == 1 && p2.move == 1) {
       if (p1.attack >= p2.health) {
         _endBattle(_battle.players[0], _battle);
       } else if (p2.attack >= p1.health) {
@@ -446,6 +438,9 @@ contract AVAXGods is ERC1155, Ownable, ERC1155Supply {
     emit RoundEnded(
       _damagedPlayers
     );
+
+    //edit by javad in order resolve end of game
+    _endBattle(_battle.players[0], _battle);
 
     // Reset moves to 0
     _battle.moves[0] = 0;

@@ -5,7 +5,7 @@ import myToken from './MyToken.json';
 // //avax zoheire
 // export const ADDRESS = '0xA275A7B25f28Ad27d8af78d33587A0c90C06fAB0';
 // avax 
-export const ADDRESS = '0xAf2dd02b874DD1c64b180288f7d50A5f9fFACD2e';
+export const ADDRESS = '0x0Fd585e3e0B16E07F64c79258A7cFD0a58e28d0A';
 // sepolia
 // export const ADDRESS = '0x4B9459d447A72dbCc79f70f517B7aBb19fc869e3';
 export const { abi: ABI } = contract;
