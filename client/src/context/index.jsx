@@ -27,6 +27,18 @@ export const GlobalContextProvider = ({ children }) => {
 
   const navigate = useNavigate();
 
+  // Create a providerOptions object
+  const providerOptions = {
+    /* Specify your provider options here */
+  };
+
+  // Create a new instance of Web3Modal
+  const web3Modal = new Web3Modal({
+    network: "mainnet", // optional
+    cacheProvider: true, // optional
+    providerOptions // required
+  });
+
   //* Set battleground to local storage
   useEffect(() => {
     const isBattleground = localStorage.getItem('battleground');
@@ -38,6 +50,19 @@ export const GlobalContextProvider = ({ children }) => {
     }
   }, []);
 
+  // //* Reset web3 onboarding modal params
+  // useEffect(() => {
+  //   const resetParams = async () => {
+  //     const currentStep = await GetParams();
+
+  //     setStep(currentStep.step);
+  //   };
+
+  //   resetParams();
+
+  //   window?.ethereum?.on('chainChanged', () => resetParams());
+  //   window?.ethereum?.on('accountsChanged', () => resetParams());
+  // }, []);
   //* Reset web3 onboarding modal params
   useEffect(() => {
     const resetParams = async () => {
@@ -48,16 +73,26 @@ export const GlobalContextProvider = ({ children }) => {
 
     resetParams();
 
-    window?.ethereum?.on('chainChanged', () => resetParams());
-    window?.ethereum?.on('accountsChanged', () => resetParams());
+    web3Modal.on('chainChanged', () => resetParams());
+    web3Modal.on('accountsChanged', () => resetParams());
   }, []);
+
+
+  // //* Set the wallet address to the state
+  // const updateCurrentWalletAddress = async () => {
+  //   const accounts = await window?.ethereum?.request({ method: 'eth_accounts' });
+
+  //   if (accounts) setWalletAddress(accounts[0]);
+  // };
 
   //* Set the wallet address to the state
   const updateCurrentWalletAddress = async () => {
-    const accounts = await window?.ethereum?.request({ method: 'eth_accounts' });
+    const provider = await web3Modal.connect();
+    const accounts = await provider.request({ method: 'eth_accounts' });
 
     if (accounts) setWalletAddress(accounts[0]);
   };
+
 
   useEffect(() => {
     updateCurrentWalletAddress();

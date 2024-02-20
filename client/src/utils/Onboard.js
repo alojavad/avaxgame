@@ -1,42 +1,113 @@
 /* eslint-disable prefer-destructuring */
-function isEthereum() {
-  if (window.ethereum) {
+import Web3Modal from 'web3modal';
+
+// function isEthereum() {
+//   if (window.ethereum) {
+//     return true;
+//   }
+//   return false;
+// }
+
+// Create a providerOptions object
+const providerOptions = {
+  /* Specify your provider options here */
+};
+
+// Create a new instance of Web3Modal
+const web3Modal = new Web3Modal({
+  network: "mainnet", // optional
+  cacheProvider: true, // optional
+  providerOptions // required
+});
+
+async function isEthereum() {
+  const provider = await web3Modal.connect();
+  if (provider) {
     return true;
   }
   return false;
 }
 
-function getChainID() {
-  if (isEthereum()) {
-    return parseInt(window.ethereum.chainId, 16);
+// function getChainID() {
+//   if (isEthereum()) {
+//     return parseInt(window.ethereum.chainId, 16);
+//   }
+//   return 0;
+// }
+
+async function getChainID() {
+  const provider = await web3Modal.connect();
+  if (provider) {
+    return parseInt(provider.chainId, 16);
   }
   return 0;
 }
 
+// async function handleConnection(accounts) {
+//   if (accounts.length === 0) {
+//     const fetchedAccounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+//     return fetchedAccounts;
+//   }
+
+//   return accounts;
+// }
+
 async function handleConnection(accounts) {
+  const provider = await web3Modal.connect();
   if (accounts.length === 0) {
-    const fetchedAccounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const fetchedAccounts = await provider.request({ method: 'eth_requestAccounts' });
     return fetchedAccounts;
   }
 
   return accounts;
 }
 
+// async function requestAccount() {
+//   let currentAccount = 0x0;
+//   if (isEthereum() && getChainID() !== 0) {
+//     let accounts = await window.ethereum.request({ method: 'eth_accounts' });
+//     accounts = await handleConnection(accounts);
+//     currentAccount = accounts[0];
+//   }
+//   return currentAccount;
+// }
+
 async function requestAccount() {
   let currentAccount = 0x0;
-  if (isEthereum() && getChainID() !== 0) {
-    let accounts = await window.ethereum.request({ method: 'eth_accounts' });
+  const provider = await web3Modal.connect();
+  if (provider && getChainID() !== 0) {
+    let accounts = await provider.request({ method: 'eth_accounts' });
     accounts = await handleConnection(accounts);
     currentAccount = accounts[0];
   }
   return currentAccount;
 }
 
+// async function requestBalance(currentAccount) {
+//   let currentBalance = 0;
+//   if (isEthereum()) {
+//     try {
+//       currentBalance = await window.ethereum.request({
+//         method: 'eth_getBalance',
+//         params: [currentAccount, 'latest'],
+//       });
+
+//       currentBalance = parseInt(currentBalance, 16) / 1e18;
+
+//       return { currentBalance, err: false };
+//     } catch (err) {
+//       return { currentBalance, err: true };
+//     }
+//   }
+//   return { currentBalance, err: true };
+// }
+
 async function requestBalance(currentAccount) {
   let currentBalance = 0;
-  if (isEthereum()) {
+  const provider = await web3Modal.connect();
+  if (provider) {
     try {
-      currentBalance = await window.ethereum.request({
+      currentBalance = await provider.request({
         method: 'eth_getBalance',
         params: [currentAccount, 'latest'],
       });
