@@ -73,11 +73,11 @@ export const GetParams = async () => {
 
   response.account = currentAccount;
 
-  if (getChainID() !== 43113) {
-  // if (getChainID() !== 11155111) {
-    response.step = 2;
-    return response;
-  }
+  // if (getChainID() !== 43113) {
+  // // if (getChainID() !== 11155111) {
+  //   response.step = 2;
+  //   return response;
+  // }
 
   const { currentBalance, err } = await requestBalance(currentAccount);
   if (err) {

@@ -33,17 +33,17 @@ const OnboardModal = () => {
   const generateStep = (st) => {
     switch (st) {
       case 0:
-        return (
-          <>
-            <p className={styles.modalText}>
-              You don't have Core Wallet installed!
-            </p>
-            <CustomButton
-              title="Download Core"
-              handleClick={() => window.open('https://core.app/', '_blank')}
-            />
-          </>
-        );
+        // return (
+        //   <>
+        //     <p className={styles.modalText}>
+        //       You don't have Core Wallet installed!
+        //     </p>
+        //     <CustomButton
+        //       title="Download Core"
+        //       handleClick={() => window.open('https://core.app/', '_blank')}
+        //     />
+        //   </>
+        // );
 
       case 1:
         return (
