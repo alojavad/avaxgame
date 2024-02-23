@@ -10,13 +10,17 @@ async function deploy(name: string, ...params: [string]) {
 }
 
 async function main() {
-  const [admin] = await ethers.getSigners();
-  
-  console.log(`Deploying a smart contract...`);
+  const metadataURI = "https://example.com/metadata";
+  const tokenAddress = "0x9D58b1a574bE037dBE18CBae0A6BfeCbD2D0D376";
+  const commisionAddress = "0xC069a4ffa84e4A908C72548B8b23Fa233E87eb5c";
 
-  const AVAXGods = (await deploy('AVAXGods', _metadataUri)).connect(admin);
+  // Deploy the contract
+  const Contract = await ethers.getContractFactory("AVAXGods");
+  const contract = await Contract.deploy(metadataURI, tokenAddress, commisionAddress);
 
-  console.log({ AVAXGods: AVAXGods.address });
+  await contract.deployed();
+
+  console.log("Contract deployed to address:", contract.address);
 }
 
 main()

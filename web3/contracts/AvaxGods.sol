@@ -37,10 +37,19 @@ contract AVAXGods is ERC1155, Ownable, ERC1155Supply {
 
   uint public commissionRate = 5;
 
-  function _update(address from, address to, uint256[] memory ids, uint256[] memory values) internal override(ERC1155, ERC1155Supply) {
-    super._update(from, to, ids, values);
-    // additional code
-    }
+   function _beforeTokenTransfer(
+    address operator,
+    address from,
+    address to,
+    uint256[] memory ids,
+    uint256[] memory amounts,
+    bytes memory data
+  ) internal virtual override(ERC1155, ERC1155Supply) {
+      super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
+      // Your additional code here
+  }
+
+
 
   /// @dev GameToken struct to store player token info
   struct GameToken {
@@ -144,7 +153,7 @@ contract AVAXGods is ERC1155, Ownable, ERC1155Supply {
 
   /// @dev Initializes the contract by setting a `metadataURI` to the token collection
   /// @param _metadataURI baseURI where token metadata is stored
-  constructor(string memory _metadataURI,address tokenAddress, address commisionAddress) ERC1155(_metadataURI)  Ownable(msg.sender)  {
+  constructor(string memory _metadataURI,address tokenAddress, address commisionAddress) ERC1155(_metadataURI)  Ownable()  {
     baseURI = _metadataURI; // Set baseURI
     token = IERC20(tokenAddress);
     _commisionAddress = payable(commisionAddress);
@@ -526,16 +535,5 @@ contract AVAXGods is ERC1155, Ownable, ERC1155Supply {
   // Token URI getter function
   function tokenURI(uint256 tokenId) public view returns (string memory) {
     return string(abi.encodePacked(baseURI, '/', uintToStr(tokenId), '.json'));
-  }
-
-  // The following functions are overrides required by Solidity.
-  function _beforeTokenTransfer(
-    address operator,
-    address from,
-    address to,
-    uint256[] memory ids,
-    uint256[] memory amounts,
-    bytes memory data
-  ) internal {
   }
 }

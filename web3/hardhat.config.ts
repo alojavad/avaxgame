@@ -13,7 +13,7 @@ dotenv.config();
 
 export default {
   solidity: {
-    version: '0.8.16',
+    version: '0.8.20',
     settings: {
       viaIR: true,
       optimizer: {
@@ -25,7 +25,7 @@ export default {
   networks: {
     fuji: {
       url: 'https://api.avax-test.network/ext/bc/C/rpc',
-      gasPrice: 225000000000,
+      gasPrice: 25500000000,
       chainId: 43113,
       accounts: [process.env.PRIVATE_KEY],
     },
