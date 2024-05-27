@@ -1,7 +1,7 @@
 import { time, loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
 import { expect } from "chai";
-import { ethers, artifacts } from "hardhat";
+import { ethers, artifacts, network } from "hardhat";
 
 describe("AvaxGods", function () {
   let AvaxGods;
@@ -10,7 +10,7 @@ describe("AvaxGods", function () {
   
   before(async function () {
     // The address of your deployed contract
-    const deployedAddress = "0x85a5Be905D5EDe5eF860D29DA44C72FDF3739ae2";
+    const deployedAddress = "0xe10b37FC6E687E771e548B1f1d7498cde361D49F";
 
     // The ABI of your Contract
     const AvaxGodsArtifact = await artifacts.readArtifact("AVAXGods");
@@ -24,7 +24,28 @@ describe("AvaxGods", function () {
 
     account1 = new ethers.Wallet(privateKey1, ethers.provider);
     account2 = new ethers.Wallet(privateKey2, ethers.provider);
+
+
+      // Get the balance of account1
+    let balance = await ethers.provider.getBalance(account1.address);
+    console.log(`Balance of account1: ${ethers.utils.formatEther(balance)}`);
+
+    // Get the public key of account1
+    let publicKey = ethers.utils.computePublicKey(account1.privateKey);
+    console.log(`Public key of account1: ${publicKey}`);
+
+    // Get the balance of account1
+    let balance2 = await ethers.provider.getBalance(account2.address);
+    console.log(`Balance of account2: ${ethers.utils.formatEther(balance2)}`);
+  
+    // Get the public key of account1
+    let publicKey2 = ethers.utils.computePublicKey(account2.privateKey);
+    console.log(`Public key of account2: ${publicKey2}`);
+
+    console.log(`Network name: ${network.name}`);
+
   });
+
   describe("registerPlayer", function () {
     it("should register player one", async function () {
       const name = "player1";

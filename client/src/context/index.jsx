@@ -3,8 +3,8 @@ import { ethers } from 'ethers';
 import Web3Modal from 'web3modal';
 import { useNavigate } from 'react-router-dom';
 
-import { GetParams } from '../utils/Onboard.js';
-import { ABI, ADDRESS, ABITOKEN, TOKEN_ADDRESS } from '../contract';
+import { GetParams } from '../utils/Onboard';
+import { ABI, ADDRESS } from '../contract';
 import { createEventListeners } from './createEventListeners';
 
 const GlobalContext = createContext();
@@ -13,7 +13,6 @@ export const GlobalContextProvider = ({ children }) => {
   const [walletAddress, setWalletAddress] = useState('');
   const [battleGround, setBattleGround] = useState('bg-astral');
   const [contract, setContract] = useState(null);
-  const [tokenContract, setTokenContract] = useState(null);
   const [provider, setProvider] = useState(null);
   const [step, setStep] = useState(1);
   const [gameData, setGameData] = useState({ players: [], pendingBattles: [], activeBattle: null });
@@ -27,18 +26,6 @@ export const GlobalContextProvider = ({ children }) => {
 
   const navigate = useNavigate();
 
-  // Create a providerOptions object
-  const providerOptions = {
-    /* Specify your provider options here */
-  };
-
-  // Create a new instance of Web3Modal
-  const web3Modal = new Web3Modal({
-    network: "mainnet", // optional
-    cacheProvider: true, // optional
-    providerOptions // required
-  });
-
   //* Set battleground to local storage
   useEffect(() => {
     const isBattleground = localStorage.getItem('battleground');
@@ -50,19 +37,6 @@ export const GlobalContextProvider = ({ children }) => {
     }
   }, []);
 
-  // //* Reset web3 onboarding modal params
-  // useEffect(() => {
-  //   const resetParams = async () => {
-  //     const currentStep = await GetParams();
-
-  //     setStep(currentStep.step);
-  //   };
-
-  //   resetParams();
-
-  //   window?.ethereum?.on('chainChanged', () => resetParams());
-  //   window?.ethereum?.on('accountsChanged', () => resetParams());
-  // }, []);
   //* Reset web3 onboarding modal params
   useEffect(() => {
     const resetParams = async () => {
@@ -73,26 +47,16 @@ export const GlobalContextProvider = ({ children }) => {
 
     resetParams();
 
-    web3Modal.on('chainChanged', () => resetParams());
-    web3Modal.on('accountsChanged', () => resetParams());
+    window?.ethereum?.on('chainChanged', () => resetParams());
+    window?.ethereum?.on('accountsChanged', () => resetParams());
   }, []);
-
-
-  // //* Set the wallet address to the state
-  // const updateCurrentWalletAddress = async () => {
-  //   const accounts = await window?.ethereum?.request({ method: 'eth_accounts' });
-
-  //   if (accounts) setWalletAddress(accounts[0]);
-  // };
 
   //* Set the wallet address to the state
   const updateCurrentWalletAddress = async () => {
-    const provider = await web3Modal.connect();
-    const accounts = await provider.request({ method: 'eth_accounts' });
+    const accounts = await window?.ethereum?.request({ method: 'eth_requestAccounts' });
 
     if (accounts) setWalletAddress(accounts[0]);
   };
-
 
   useEffect(() => {
     updateCurrentWalletAddress();
@@ -107,12 +71,10 @@ export const GlobalContextProvider = ({ children }) => {
       const connection = await web3Modal.connect();
       const newProvider = new ethers.providers.Web3Provider(connection);
       const signer = newProvider.getSigner();
-      const newTokenContract = new ethers.Contract(TOKEN_ADDRESS, ABITOKEN, signer);
       const newContract = new ethers.Contract(ADDRESS, ABI, signer);
+
       setProvider(newProvider);
-      console.log('set contract');
       setContract(newContract);
-      setTokenContract(newTokenContract);
     };
 
     setSmartContractAndProvider();
@@ -191,8 +153,6 @@ export const GlobalContextProvider = ({ children }) => {
         battleGround,
         setBattleGround,
         contract,
-        tokenContract,
-        ADDRESS,
         gameData,
         walletAddress,
         updateCurrentWalletAddress,

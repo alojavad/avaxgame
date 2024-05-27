@@ -1,128 +1,68 @@
 /* eslint-disable prefer-destructuring */
-import Web3Modal from 'web3modal';
+import { createWeb3Modal, defaultConfig } from '@web3modal/ethers5/react'
+import { useWeb3Modal } from '@web3modal/ethers5/react'
+import { useWeb3ModalAccount } from '@web3modal/ethers5/react'
+import Web3Modal from "web3modal";
+import { ethers } from "ethers"
 
-// function isEthereum() {
-//   if (window.ethereum) {
-//     return true;
-//   }
-//   return false;
-// }
 
-// Create a providerOptions object
-const providerOptions = {
-  /* Specify your provider options here */
+// 1. Get projectId
+const projectId = 'c973d6ef98abcd6c37a2d85593b98159'
+
+// Define the network
+const fujiCChain = {
+  chainId: 43113, // Chain ID for Fuji C-Chain
+  name: 'Fuji C-Chain',
 };
 
-// Create a new instance of Web3Modal
-const web3Modal = new Web3Modal({
-  network: "mainnet", // optional
-  cacheProvider: true, // optional
-  providerOptions // required
-});
-
-async function isEthereum() {
-  const provider = await web3Modal.connect();
-  if (provider) {
-    return true;
-  }
-  return false;
+// 2. Set chains
+const mainnet = {
+  chainId: 1,
+  name: 'Ethereum',
+  currency: 'ETH',
+  explorerUrl: 'https://etherscan.io',
+  rpcUrl: 'https://cloudflare-eth.com'
 }
 
-// function getChainID() {
-//   if (isEthereum()) {
-//     return parseInt(window.ethereum.chainId, 16);
-//   }
-//   return 0;
-// }
-
-async function getChainID() {
-  const provider = await web3Modal.connect();
-  if (provider) {
-    return parseInt(provider.chainId, 16);
-  }
-  return 0;
+const sepolia = {
+  chainId: 11155111, // Chain ID for Sepolia
+  name: 'Sepolia',
+  currency: 'ETH',
+  explorerUrl: 'https://sepolia-explorer.optimism.io', // Sepolia Block Explorer URL
+  rpcUrl: 'https://sepolia.optimism.io' // Sepolia RPC URL
 }
 
-// async function handleConnection(accounts) {
-//   if (accounts.length === 0) {
-//     const fetchedAccounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-//     return fetchedAccounts;
-//   }
-
-//   return accounts;
-// }
-
-async function handleConnection(accounts) {
-  const provider = await web3Modal.connect();
-  if (accounts.length === 0) {
-    const fetchedAccounts = await provider.request({ method: 'eth_requestAccounts' });
-    return fetchedAccounts;
-  }
-
-  return accounts;
+// 3. Create modal
+const metadata = {
+  name: 'My Website',
+  description: 'My Website description',
+  url: 'https://mywebsite.com', // origin must match your domain & subdomain
+  icons: ['https://avatars.mywebsite.com/']
 }
 
-// async function requestAccount() {
-//   let currentAccount = 0x0;
-//   if (isEthereum() && getChainID() !== 0) {
-//     let accounts = await window.ethereum.request({ method: 'eth_accounts' });
-//     accounts = await handleConnection(accounts);
-//     currentAccount = accounts[0];
-//   }
-//   return currentAccount;
-// }
+createWeb3Modal({
+  ethersConfig: defaultConfig({ metadata }),
+  chains: [fujiCChain, mainnet, sepolia],
+  projectId,
+  enableAnalytics: true // Optional - defaults to your Cloud configuration
+})
 
-async function requestAccount() {
-  let currentAccount = 0x0;
+async function getBalance() {
+  const web3Modal = new Web3Modal();
   const provider = await web3Modal.connect();
-  if (provider && getChainID() !== 0) {
-    let accounts = await provider.request({ method: 'eth_accounts' });
-    accounts = await handleConnection(accounts);
-    currentAccount = accounts[0];
-  }
-  return currentAccount;
+  const ethersProvider = new ethers.providers.Web3Provider(provider);
+
+  const signer = ethersProvider.getSigner();
+  const account = await signer.getAddress();
+  const balance = await ethersProvider.getBalance(account);
+
+  console.log(`The balance of ${account} is ${ethers.utils.formatEther(balance)} ETH`);
+  // return balance;
 }
 
-// async function requestBalance(currentAccount) {
-//   let currentBalance = 0;
-//   if (isEthereum()) {
-//     try {
-//       currentBalance = await window.ethereum.request({
-//         method: 'eth_getBalance',
-//         params: [currentAccount, 'latest'],
-//       });
-
-//       currentBalance = parseInt(currentBalance, 16) / 1e18;
-
-//       return { currentBalance, err: false };
-//     } catch (err) {
-//       return { currentBalance, err: true };
-//     }
-//   }
-//   return { currentBalance, err: true };
-// }
-
-async function requestBalance(currentAccount) {
-  let currentBalance = 0;
-  const provider = await web3Modal.connect();
-  if (provider) {
-    try {
-      currentBalance = await provider.request({
-        method: 'eth_getBalance',
-        params: [currentAccount, 'latest'],
-      });
-
-      currentBalance = parseInt(currentBalance, 16) / 1e18;
-
-      return { currentBalance, err: false };
-    } catch (err) {
-      return { currentBalance, err: true };
-    }
-  }
-  return { currentBalance, err: true };
-}
 
 export const GetParams = async () => {
+  console.log("selectedNetworkId22");
   const response = {
     isError: false,
     message: '',
@@ -130,57 +70,43 @@ export const GetParams = async () => {
     balance: 0,
     account: '0x0',
   };
+  SwitchNetwork();
+  
+  const { open, close } = useWeb3Modal()
+  const { isConnected } = useWeb3ModalAccount();
+  // const { address, chainId, isConnected } = useWeb3ModalAccount()
+  // const { walletProvider } = useWeb 3ModalProvider()
 
-  if (!isEthereum()) {
-    response.step = 0;
-    return response;
-  }
+  console.log("1");
+  if (!isConnected) {
+    console.log("2");
+    getBalance().catch(console.error);
+    open()
+    console.log("3");
+    }
+    
 
-  const currentAccount = await requestAccount();
-  if (currentAccount === 0x0) {
-    response.step = 1;
-    return response;
-  }
-
-  response.account = currentAccount;
-
-  // if (getChainID() !== 43113) {
-  // // if (getChainID() !== 11155111) {
-  //   response.step = 2;
-  //   return response;
-  // }
-
-  const { currentBalance, err } = await requestBalance(currentAccount);
-  if (err) {
-    response.isError = true;
-    response.message = 'Error fetching balance!';
-    return response;
-  }
-  response.balance = currentBalance;
-
-  if (currentBalance < 0.2) {
-    response.step = 3;
-    return response;
-  }
 
   return response;
 };
 
 export async function SwitchNetwork() {
-  await window?.ethereum?.request({
-    method: 'wallet_addEthereumChain',
-    params: [{
-      chainId: '0xA869',
-      chainName: 'Fuji C-Chain',
+  const { provider } = useWeb3Modal();
+
+    // Get the signer
+    const signer = provider && new ethers.providers.Web3Provider(provider).getSigner();
+
+    signer.provider.send('wallet_addEthereumChain', [{
+      chainId: '0x539', // Sepolia Testnet Chain ID
+      chainName: 'Sepolia',
       nativeCurrency: {
-        name: 'AVAX',
-        symbol: 'AVAX',
+        name: 'ETH',
+        symbol: 'ETH',
         decimals: 18,
       },
-      rpcUrls: ['https://api.avax-test.network/ext/bc/C/rpc'],
-      blockExplorerUrls: ['https://testnet.snowtrace.io'],
-    }],
-  }).catch((error) => {
-    console.log(error);
-  });
-}
+      rpcUrls: ['https://sepolia.optimism.io'], // Sepolia RPC URL
+      blockExplorerUrls: ['https://sepolia-explorer.optimism.io'], // Sepolia Block Explorer URL
+    }]).catch((error) => {
+      console.log(error);
+    });
+  }

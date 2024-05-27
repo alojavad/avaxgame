@@ -20,14 +20,14 @@ const OnboardModal = () => {
 
   useEffect(() => {
     resetParams();
-
     window?.ethereum?.on('chainChanged', () => {
       resetParams();
     });
-
+    console.log("hey youuu");
     window?.ethereum?.on('accountsChanged', () => {
       resetParams();
     });
+    console.log("hey youuu");
   }, []);
 
   const generateStep = (st) => {

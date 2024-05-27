@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { CustomButton, CustomInput, PageHOC } from '../components';
 import { useGlobalContext } from '../context';
 
+
 const Home = () => {
   const { contract, walletAddress, gameData, setShowAlert, setErrorMessage } = useGlobalContext();
   const [playerName, setPlayerName] = useState('');
@@ -79,7 +80,7 @@ const Home = () => {
 export default PageHOC(
   Home,
   <>
-    Welcome to Avax Gods <br /> a Web3 NFT Card Game
+    Welcome to Finno Gods Battle <br /> a Web3 NFT Card Game
   </>,
   <>
     Connect your wallet to start playing <br /> the ultimate Web3 Battle Card
