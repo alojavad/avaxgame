@@ -173,7 +173,7 @@ contract AVAXGods is ERC1155, Ownable, ERC1155Supply {
   /// @dev Registers a player
   /// @param _name player name; set by player
   function registerPlayer(string memory _name, string memory _gameTokenName) external {
-    require(!isPlayer(msg.sender), "Player already registered"); // Require that player is not already registered
+    // require(!isPlayer(msg.sender), "Player already registered"); // Require that player is not already registered
     
     uint256 _id = players.length;
     players.push(Player(msg.sender, _name, 10, 25, false)); // Adds player to players array

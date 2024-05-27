@@ -10,7 +10,7 @@ describe("AvaxGods", function () {
   
   before(async function () {
     // The address of your deployed contract
-    const deployedAddress = "0xe10b37FC6E687E771e548B1f1d7498cde361D49F";
+    const deployedAddress = "0xeD8F01bfBc050A6beA551032B086843d8a643463";
 
     // The ABI of your Contract
     const AvaxGodsArtifact = await artifacts.readArtifact("AVAXGods");
@@ -48,14 +48,18 @@ describe("AvaxGods", function () {
 
   describe("registerPlayer", function () {
     it("should register player one", async function () {
-      const name = "player1";
-      const gameTokenName = "player1";
+      const name = "player111";
+      const gameTokenName = "player111";
 
       // Call the registerPlayer function
-      const tx = await AvaxGods.connect(account1).registerPlayer(name, gameTokenName);
+      const tx = await AvaxGods.connect(account1).registerPlayer(name, gameTokenName , { gasLimit: 2000000 });
 
       // Wait for the transaction to be mined
       const receipt = await tx.wait();
+      console.log("receipt");
+      console.log(receipt);
+      
+      
 
       // Check if the NewPlayer event was emitted
       expect(receipt.events).to.satisfy(anyValue(

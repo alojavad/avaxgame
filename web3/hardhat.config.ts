@@ -27,7 +27,17 @@ export default {
       url: 'https://api.avax-test.network/ext/bc/C/rpc',
       gasPrice: 25500000000,
       chainId: 43113,
-      accounts: [process.env.PRIVATE_KEY],
+      accounts: ["0x9f0a9a9401f8515a165b1e7540af3873b325b908f5953b0e2df034f2599dcb3d", "0x9802f10c29c5afc69555871c47bf21588d977deea1f8d264f5b8e23376a7cf70"] // Your private keys
+      ,
+      gas: 5000000 // Set your desired gas limit here
+    },
+    sepolia: {
+      url: 'https://ethereum-sepolia.publicnode.com',
+      gasPrice: 25500000000,
+      chainId: 11155111,
+      accounts: ["0x9f0a9a9401f8515a165b1e7540af3873b325b908f5953b0e2df034f2599dcb3d", "0x9802f10c29c5afc69555871c47bf21588d977deea1f8d264f5b8e23376a7cf70"] // Your private keys
+      ,
+      gas: 5000000 // Set your desired gas limit here
     },
     // subnet: {
     //   url: process.env.NODE_URL,

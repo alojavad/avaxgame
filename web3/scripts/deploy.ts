@@ -11,7 +11,7 @@ async function deploy(name: string, ...params: [string]) {
 
 async function main() {
   const metadataURI = "https://example.com/metadata";
-  const tokenAddress = "0x9D58b1a574bE037dBE18CBae0A6BfeCbD2D0D376";
+  const tokenAddress = "0xA4dA747b401b3828548e2AcA79ACE592798257f0";
   const commisionAddress = "0xC069a4ffa84e4A908C72548B8b23Fa233E87eb5c";
 
   // Deploy the contract
